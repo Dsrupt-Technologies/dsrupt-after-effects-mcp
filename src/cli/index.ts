@@ -9,6 +9,7 @@ import { createRequire } from "node:module";
 import { discoverAfterEffects } from "../discovery/after-effects.js";
 import { realHost } from "../discovery/host.js";
 import { formatChecks, runDoctor } from "./doctor.js";
+import { installSkill } from "./install-skill.js";
 import { formatLive, runLiveCheck } from "./live-check.js";
 import {
   claudeCodeCommand,
@@ -34,6 +35,8 @@ Commands
   config              Print the MCP client configuration for this install.
   install-codex       Register the server with the Codex CLI (codex mcp add).
   install-claude-code Register the server with Claude Code (claude mcp add).
+  install-skill       Copy the entry skill into ~/.agents/skills and ~/.claude/skills so a
+                      future agent session knows this server exists (DSRUPT_SKILLS_DIRS adds more).
   help, version
 
 Options
@@ -159,6 +162,9 @@ async function main(argv: string[]): Promise<number> {
     case "install-claude-code":
     case "install-claude":
       process.stdout.write(`${installClaudeCode(p.env)}\n`);
+      return 0;
+    case "install-skill":
+      process.stdout.write(`${installSkill().join("\n")}\n`);
       return 0;
     default:
       throw new Error(`unknown command '${p.command}'. Run dsrupt-after-effects help.`);

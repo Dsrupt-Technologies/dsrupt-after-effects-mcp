@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dsrupt After Effects"
+  short_description: "Build editable motion graphics inside your open After Effects project"
+  default_prompt: "Use $dsrupt-after-effects to connect the local After Effects MCP and build what I describe in my open comp."

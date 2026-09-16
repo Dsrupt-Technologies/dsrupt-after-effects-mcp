@@ -44,7 +44,13 @@ server with your client:
 node dist/cli/index.js install-codex          # Codex CLI
 node dist/cli/index.js install-claude-code    # Claude Code
 node dist/cli/index.js config                 # JSON block for Claude Desktop, Cursor, others
+node dist/cli/index.js install-skill          # entry skill for Codex/Claude Code sessions
 ```
+
+`install-skill` copies a small `dsrupt-after-effects` skill into `~/.agents/skills` and
+`~/.claude/skills`, so an agent that has not been told about the server can still find it
+(in Codex or ChatGPT desktop: `/dsrupt-after-effects`). Every real instruction stays on the
+server behind `ae_get_skill`.
 
 Platform notes: [Windows](docs/SETUP-WINDOWS.md), [macOS](docs/SETUP-MACOS.md), and
 [MCP clients](docs/MCP-CLIENTS.md).
