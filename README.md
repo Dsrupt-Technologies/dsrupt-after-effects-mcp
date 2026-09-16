@@ -1,223 +1,145 @@
-![MCP for After Effects](https://raw.githubusercontent.com/kumoproductions/mcp-aftereffects/main/assets/ogp.png)
+# Dsrupt After Effects MCP
 
-# mcp-aftereffects
+A local MCP server that connects an AI agent to Adobe After Effects, with the agent's
+working knowledge served by the same server as skills.
 
-[![CI](https://github.com/kumoproductions/mcp-aftereffects/actions/workflows/ci.yml/badge.svg)](https://github.com/kumoproductions/mcp-aftereffects/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![Node](https://img.shields.io/badge/node-%3E%3D24-informational)](package.json)
-[![After Effects](https://img.shields.io/badge/After%20Effects-2024%E2%80%932026-informational)](https://www.adobe.com/products/aftereffects.html)
-[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS-informational)](#requirements)
+```text
+Desktop agent / MCP client (Codex, Claude Code, Claude Desktop, Cursor, ...)
+        |  stdio
+Dsrupt After Effects MCP  (Node)
+        |  file mailbox + OS scripting (AppleScript / AfterFX.exe -r)
+Adobe After Effects
+```
 
-English | [日本語](./README.ja.md)
+Two surfaces, one process:
 
-An MCP server that enables AI to control Adobe After Effects.
+- **Tools**: inspect the project, comps and layers; discover the 197 catalogued operations
+  and run them; render a frame to check the result; save.
+- **Skills**: `ae_get_skill` serves an index, then one skill, then one reference, so the agent
+  loads only what the current task needs instead of carrying every guide in context.
 
-You can connect MCP-compatible clients such as Claude Code or Claude Desktop to a running instance of After Effects, allowing the AI to handle everything from project inspection and editing to rendering.
+The runtime derives from the MIT-licensed [kumoproductions/mcp-aftereffects](https://github.com/kumoproductions/mcp-aftereffects);
+see [UPSTREAM.md](UPSTREAM.md). Windows and macOS, After Effects 2024 to 2026, Node 24+.
+No panel or plugin is installed in After Effects.
 
-There is no need to provide detailed instructions on how to operate After Effects. Simply explain what you want to achieve in natural language, and the AI will check the project status and perform the necessary operations.
+> **This tool edits the open After Effects project.** Anything the agent reads (comp names,
+> expressions, footage paths) may be sent to the AI service behind your client. Try it on a
+> copy first, and keep `AE_MCP_READONLY=1` for inspection-only sessions.
 
-**Windows / macOS · After Effects 2024–2026 · Node.js 24+**
-
-> [!CAUTION]
-> **This tool directly manipulates After Effects projects via AI.**
->
-> The AI can read project contents and modify compositions, layers, effects, keyframes, and more.
->
-> Additionally, information the AI reads from the project may be sent to the AI service you are using. This may include composition names, layer names, expressions, keyframes, footage file paths, etc.
->
-> If using this for projects under NDA or unreleased works, please check the data retention policy of the AI service you are using and the logs of your MCP client beforehand.
->
-> For first-time use, we recommend trying it with a backup or a test .aep file rather than a critical project.
-
-## Capabilities
-
-With mcp-aftereffects, you can request the AI to perform After Effects tasks.
-
-- Inspect project contents
-- Investigate compositions and layers
-- Edit layers and properties
-- Add or modify keyframes
-- Edit effects and masks
-- Edit text and shapes
-- Set expressions
-- Save projects
-- Create and restore project backups
-- Render frames to preview changes
-
-For example, you can give instructions like these:
-
-> "Import this Illustrator file and create some nice-looking text motion."
-
-> "Apply the revisions mentioned in this PDF."
-
-> "Point out any issues in this AEP."
-
-Even for complex tasks, the AI can combine necessary operations while checking the project status.
-
-## Requirements
-
-- Windows or macOS
-- Adobe After Effects 2024 / 2025 / 2026
-- Node.js 24 or higher
-- MCP-compatible client (Claude Code, Claude Desktop, etc.)
-
-No plugins or panels need to be installed within After Effects.
-
-### After Effects Settings
-
-In After Effects Preferences, please turn ON the following:
-
-**Preferences → Scripting & Expressions → "Allow Scripts to Write Files and Access Network"**
-
-If this setting is OFF, the AI will not be able to perform operations correctly.
-
-### For macOS
-
-Upon first use, macOS may request permission for the client to control After Effects.
-
-If it is not permitted, go to:
-
-**System Settings → Privacy & Security → Automation**
-
-and allow your MCP client or terminal to control After Effects.
-
-## Quick Start
-
-No installation is required on the After Effects side.
-
-First, launch After Effects and open the project you wish to operate on.
-
-Next, register mcp-aftereffects with your MCP client.
-
-### Claude Code
+## Install
 
 ```bash
-claude mcp add aftereffects -- npx -y @kumoproductions/mcp-aftereffects
+git clone https://github.com/Dsrupt-Technologies/dsrupt-after-effects-mcp.git
+cd dsrupt-after-effects-mcp
+npm ci --ignore-scripts
+npm run build
+node dist/cli/index.js doctor
 ```
 
-### Claude Desktop
+`doctor` checks Node and npm, the built server, the skill bundle, the mailbox directory,
+and where After Effects is installed. It does not launch After Effects. Then register the
+server with your client:
 
-Add the following to your MCP configuration file:
-
-```json
-{
-  "mcpServers": {
-    "aftereffects": {
-      "command": "npx",
-      "args": ["-y", "@kumoproductions/mcp-aftereffects"]
-    }
-  }
-}
+```bash
+node dist/cli/index.js install-codex          # Codex CLI
+node dist/cli/index.js install-claude-code    # Claude Code
+node dist/cli/index.js config                 # JSON block for Claude Desktop, Cursor, others
 ```
 
-If you are using other MCP clients, please follow their respective registration methods for MCP servers.
+Platform notes: [Windows](docs/SETUP-WINDOWS.md), [macOS](docs/SETUP-MACOS.md), and
+[MCP clients](docs/MCP-CLIENTS.md).
 
-### Read-Only Mode
+## Verify the connection
 
-If you want to inspect or audit project content without making any changes, you can use read-only mode.
+Installation and a working After Effects link are different facts, so they are checked
+separately:
 
-Add the following to your MCP client configuration:
-
-```json
-{
-  "mcpServers": {
-    "aftereffects": {
-      "command": "npx",
-      "args": ["-y", "@kumoproductions/mcp-aftereffects"],
-      "env": {
-        "AE_MCP_READONLY": "1"
-      }
-    }
-  }
-}
+```bash
+node dist/cli/index.js doctor      # 1. Node/npm, files, skills, AE location
+node dist/cli/index.js check-ae    # 2. server starts, 3. tools advertised, 4. skills served,
+                                   # 5. After Effects answers ae_project_info (read-only)
 ```
 
-You can still investigate the project and render frames for preview.
+`check-ae` only talks to an After Effects that is already running, so it never boots one by
+surprise; pass `--allow-launch` to change that. The sixth state, whether **your agent's
+current conversation** can call the tools, is only visible from inside the client: ask it to
+run `ae_get_skill({})` and then `ae_project_info({})`.
 
-## Advanced Settings
+## First calls from the agent
 
-Usually, no configuration is necessary.
+1. `ae_get_skill({})`: the skill index.
+2. `ae_get_skill({ name: "ae-clean-rig" })`: the entry skill. It routes to references such as
+   `references/sliders.md` and to companion skills.
+3. `ae_project_info({})`: what is open. This is the live connection test.
+4. `ae_catalog({})`, then `ae_catalog({ category: "layer" })`: exact operations and parameters.
+5. `ae_do({ operation: "layer.create_text", args: { comp: "Main", text: "Hello", name: "Title" } })`.
+6. `ae_render_frame({ compNameOrId: "Main", time: 1, outPath: "/tmp/check.png" })`, then look at it.
+7. `ae_save_project({})`.
 
-In some environments, such as when After Effects is installed in a non-standard location, additional settings may be required.
+The twelve tools are listed in [docs/TOOLS.md](docs/TOOLS.md). Operations are not tools;
+the agent discovers them through `ae_catalog` at runtime.
 
-### Specifying After Effects Location
+## Skills
 
-If After Effects is not in the standard installation path, you can specify the executable location using `AE_MCP_EXE`.
+| Skill              | Load it for                                                                                                                                                                                                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ae-clean-rig`     | Every task. Inspect first, build native and editable, animate sparsely, verify by rendering, save where intended. Routes to nine references: construction, reference motion, typography, effects, media, editable rigs, sliders, validation, scripting. |
+| `ae-animation`     | Timing, easing, anticipation and settle, reveals, expressions, motion proof.                                                                                                                                                                            |
+| `ae-ui`            | Interface layouts: static design first, tokens, component anatomy.                                                                                                                                                                                      |
+| `ae-depth`         | Parallax, 3D layers and cameras, shadows, glass surfaces.                                                                                                                                                                                               |
+| `ae-transitions`   | Reusable A-to-B transitions with a progress control.                                                                                                                                                                                                    |
+| `ae-mcp-realities` | How the transport works, policy switches, error codes, recovery after timeouts.                                                                                                                                                                         |
 
-By default, it automatically searches for After Effects in the order of 2026 → 2025 → 2024.
+Skills live in `skills/`, are described by `skills/manifest.json`, and are verified by hash
+before being served. See [docs/SKILLS.md](docs/SKILLS.md) to edit or add one.
 
-### Limiting Operation Scope
+## Safety
 
-Using `AE_MCP_ALLOW_CATEGORIES`, you can restrict the types of operations permitted for the AI.
+- Every `ae_do` call is one undo group. `batch.run` is one undo group too, but not a
+  transaction: earlier steps stay applied if a later one fails.
+- A `TIMEOUT` may mean the change already applied. The skills tell the agent to inspect before
+  retrying a mutation.
+- `AE_MCP_READONLY=1` withholds saving and importing and limits `ae_do` to read operations.
+  `AE_MCP_ALLOW_CATEGORIES` narrows the catalog. Arbitrary ExtendScript (`eval.run`) is off
+  unless `AE_MCP_ENABLE_EVAL=1`.
+- Operations that change After Effects application settings (not the project) require
+  `confirm: true`.
+- The connection test and the doctor never mutate the project. The live smoke test
+  (`npm run smoke`) refuses to run in anything but a fresh, empty, unsaved project.
 
-For example, you can limit permissions to only keyframe-related operations depending on your use case.
+## Environment
 
-## Execution of Arbitrary ExtendScript
+| Variable                  | Meaning                                                                                                        |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `DSRUPT_AE_EXE`           | After Effects to use: `AfterFX.exe` on Windows, the `.app` bundle on macOS. Also read: `AE_MCP_EXE`, `AE_EXE`. |
+| `DSRUPT_AE_SEARCH_DIRS`   | Extra folders to probe for an install (`;`-separated on Windows, `:` on macOS).                                |
+| `AE_MCP_READONLY`         | `1` for inspection-only sessions.                                                                              |
+| `AE_MCP_ALLOW_CATEGORIES` | Comma-separated operation categories to allow.                                                                 |
+| `AE_MCP_ENABLE_EVAL`      | `1` to enable `eval.run`.                                                                                      |
+| `AE_MCP_RUNTIME_DIR`      | Move the request/response mailbox (keep it per-user).                                                          |
 
-mcp-aftereffects includes an advanced feature to execute arbitrary ExtendScript for processes that cannot be handled by standard operations.
+Without an override, After Effects is found in this order: a running After Effects process,
+then installed copies under Program Files, the Windows registry, Start Menu shortcuts,
+`/Applications`, `~/Applications`, a Spotlight bundle-id query, and `DSRUPT_AE_SEARCH_DIRS`.
+Newest year wins; `locate-ae` shows every candidate and what was probed.
 
-This feature is **disabled by default**.
+## Development
 
-> [!CAUTION]
-> **Enabling arbitrary ExtendScript allows operations outside of After Effects.**
->
-> **This may permit actions that affect your entire computer**, such as file or process manipulation.
->
-> This feature is disabled by default. Enable it only if necessary.
-
-To enable it, set the following in your MCP server environment variables:
-
-```json
-"env": {
-  "AE_MCP_ENABLE_EVAL": "1"
-}
+```bash
+npm run check          # skills check, typecheck, lint, format, JSX ES3 lint, docs drift
+npm run test:offline   # 300+ tests, no After Effects needed
+npm test               # adds the e2e suites, which self-skip without a running AE
+npm run smoke          # live demo in a fresh empty project; writes runtime/dsrupt-smoke/
+npm run test:package   # pack, install to a temp prefix, start the server from there
 ```
 
-Use this feature only for advanced processing that cannot be achieved through regular operations or when custom ExtendScript is required.
-
-## Official Releases
-
-> [!NOTE]
-> **Official releases are distributed only through npm and GitHub Releases.**
->
-> Please exercise caution if obtaining packages claiming to be `@kumoproductions/mcp-aftereffects` or files claiming to be this server from any other location.
-
-## Troubleshooting
-
-### Operations Timeout
-
-Please check the following:
-
-- Is After Effects running?
-- Is a project open?
-- Is "Allow Scripts to Write Files and Access Network" turned ON?
-- On macOS, is the Automation permission enabled?
-
-### After Effects Not Found
-
-If you have installed After Effects in a non-standard location, please set `AE_MCP_EXE`.
-
-If the issue persists, please report it via an Issue or to @cumuloworks.
-
-## Developer Information
-
-For information regarding internal MCP tools, communication methods with After Effects, ExtendScript, test environments, and how to add custom operations, please refer to the developer documentation.
-
-- `docs/TOOLS.md`
-- `CONTRIBUTING.md`
-
-## Contributing
-
-Bug reports, feature requests, and Pull Requests are welcome.
-
-For information on setting up the development environment and the internal architecture, please refer to `CONTRIBUTING.md`.
+Internals, error codes and how to add an operation are in [CONTRIBUTING.md](CONTRIBUTING.md).
+The comparison with the upstream project and the reference fork is in
+[docs/COMPARISON.md](docs/COMPARISON.md); what has actually been verified, and where, is in
+[docs/VALIDATION.md](docs/VALIDATION.md).
 
 ## License
 
-MIT © 2026 kumo.productions, Inc.
-
-## Trademark
-
-Adobe® and Adobe After Effects® are trademarks of Adobe Inc.
-
-This project is an independent, unofficial tool and is **not affiliated with or endorsed by Adobe**.
+MIT. Copyright (c) 2026 kumo.productions, Inc. (upstream runtime) and Dsrupt Technologies
+(modifications). Adobe and Adobe After Effects are trademarks of Adobe Inc.; this project is
+independent and not affiliated with or endorsed by Adobe.
