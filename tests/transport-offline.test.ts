@@ -21,13 +21,21 @@ import {
 import { FileIpcTransport } from "../src/transport/FileIpcTransport.js";
 
 /**
- * An executable that exists and starts, but will never write a response.
- *
- * Per-platform because `resolveAfterFxPath` stats it: a Windows-only path made
- * every timeout and busy-lock test fail with AE_NOT_FOUND on Linux CI, before
- * the behaviour under test could run at all.
+ * An executable that exists and starts, but will never write a response: the
+ * current node binary running an empty program. The launch plan is mocked
+ * so that on every platform the transport spawns that binary directly. The
+ * real darwin plan goes through osascript, which fails fast on a non-app
+ * path and would turn every timeout test into a launch failure.
  */
-const INERT_EXE = process.platform === "win32" ? "C:/Windows/System32/cmd.exe" : "/bin/true";
+const INERT_EXE = process.execPath;
+
+vi.mock("../src/transport/launcher.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../src/transport/launcher.js")>();
+  return {
+    ...actual,
+    buildLaunchPlan: (exe: string) => ({ command: exe, args: ["-e", ""], diagnoseExit: false }),
+  };
+});
 
 const savedExe = process.env.AE_MCP_EXE;
 

@@ -2,6 +2,8 @@ import { existsSync, statSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import * as os from "node:os";
 import * as path from "node:path";
+import { discoverAfterEffects, notFoundMessage } from "./discovery/after-effects.js";
+import { realHost } from "./discovery/host.js";
 
 // Resolve the package root by walking up from this file's location until a
 // package.json appears. Compiled (dist/config.js) and source (src/config.ts,
@@ -13,7 +15,7 @@ function findPackageRoot(startDir: string): string {
     if (existsSync(path.join(dir, "package.json"))) return dir;
     const parent = path.dirname(dir);
     if (parent === dir) {
-      throw new Error(`mcp-aftereffects: no package.json found above ${startDir}`);
+      throw new Error(`dsrupt-after-effects: no package.json found above ${startDir}`);
     }
     dir = parent;
   }
@@ -211,39 +213,18 @@ export function runtimeDirWarnings(): string[] {
   return warnings.filter((w) => w !== null);
 }
 
-const DEFAULT_AE_PATHS_WIN32 = [
-  "C:/Program Files/Adobe/Adobe After Effects 2026/Support Files/AfterFX.exe",
-  "C:/Program Files/Adobe/Adobe After Effects 2025/Support Files/AfterFX.exe",
-  "C:/Program Files/Adobe/Adobe After Effects 2024/Support Files/AfterFX.exe",
-];
-
-const DEFAULT_AE_PATHS_DARWIN = [
-  "/Applications/Adobe After Effects 2026/Adobe After Effects 2026.app",
-  "/Applications/Adobe After Effects 2025/Adobe After Effects 2025.app",
-  "/Applications/Adobe After Effects 2024/Adobe After Effects 2024.app",
-];
-
 /**
- * Locate After Effects — AfterFX.exe on Windows, the .app bundle on macOS.
- * Honors AE_MCP_EXE (and the legacy AE_EXE name) first so the user can
- * override without editing source, then probes the default install paths for
- * AE 2026 → 2025 → 2024.
+ * Locate After Effects: AfterFX.exe on Windows, the .app bundle on macOS.
+ *
+ * Honors DSRUPT_AE_EXE / AE_MCP_EXE / AE_EXE first, then a running After
+ * Effects process, then bounded probes of the usual install locations (see
+ * src/discovery/after-effects.ts). Throws with the probe log when nothing
+ * is found, so the error says what was tried.
  */
 export function resolveAfterFxPath(platform: NodeJS.Platform = process.platform): string {
-  for (const env of [process.env.AE_MCP_EXE, process.env.AE_EXE]) {
-    if (env && existsSync(env)) return env;
-  }
-  const candidates = platform === "darwin" ? DEFAULT_AE_PATHS_DARWIN : DEFAULT_AE_PATHS_WIN32;
-  for (const candidate of candidates) {
-    if (existsSync(candidate)) return candidate;
-  }
-  throw new Error(
-    platform === "darwin"
-      ? "Could not locate After Effects. Set the AE_MCP_EXE env var to the .app bundle, e.g. " +
-          '"/Applications/Adobe After Effects 2026/Adobe After Effects 2026.app"'
-      : "Could not locate AfterFX.exe. Set the AE_MCP_EXE env var to the full path, e.g. " +
-          '"C:/Program Files/Adobe/Adobe After Effects 2026/Support Files/AfterFX.exe"',
-  );
+  const discovery = discoverAfterEffects(realHost(platform));
+  if (discovery.found) return discovery.found.path;
+  throw new Error(notFoundMessage(discovery));
 }
 
 /** Default per-call timeout (ms) for JSX execution before we give up polling. */
