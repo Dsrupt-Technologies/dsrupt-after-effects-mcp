@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "skills": [
+    {
+      "name": "ae-animation",
+      "description": "Timing, easing, anticipation, follow-through, reveals, motion expressions and proof frames for After Effects motion. Companion loaded through ae_get_skill when ae-clean-rig routes to it, not a starting point.",
+      "references": [],
+      "sha256": {
+        "SKILL.md": "0153c4cc566bc1287687ff98f8d178e5881efc6f87ca47c4f227bb482e1c3c83"
+      }
+    },
+    {
+      "name": "ae-clean-rig",
+      "description": "Entry point for every After Effects task through this MCP. Load first whenever the user wants to build, edit, animate, fix, inspect, verify, render or save an After Effects project, comp, layer, text, shape, effect, expression or keyframe. Routes to references and companion skills.",
+      "references": [
+        "references/construction.md",
+        "references/editable-rigs.md",
+        "references/effects.md",
+        "references/media.md",
+        "references/reference-motion.md",
+        "references/scripting.md",
+        "references/sliders.md",
+        "references/typography.md",
+        "references/validation.md"
+      ],
+      "sha256": {
+        "SKILL.md": "daad34dd241be8d19580a065468503a9a080efbb2723276e2162879aa3d0fde0",
+        "references/construction.md": "b01d3f73d24e48999f4eae43dc9893ed5f151b7becb43ace01a529943d855e74",
+        "references/editable-rigs.md": "2d4f6e5558bcb0b8c79c90680fc2e6155dd560fdd7c7f6170dfa0890f8316608",
+        "references/effects.md": "a2b64fed97de6b6f14515cdd64546434c4d771ea7da9fe7dde78a63af0a0b6de",
+        "references/media.md": "f71f20e492879fa18967a89d1e2cab2ad1e22f09538f78da58c1e18a6b37bd4b",
+        "references/reference-motion.md": "b08569bb7dc618e4dcb7a9a197ede930e73b9e1908e6017fbf6fb809c4c4a356",
+        "references/scripting.md": "c6b61522c431f790b1266a6f08d15f7de6de74acb148ff00520587785290d96f",
+        "references/sliders.md": "6f8854223a3ea0740f826b3c92ce87536c5344ad8c08235c5ec9439cd25879da",
+        "references/typography.md": "3adad153553cf7ea4733ccf89da95201d2a22a4514b7a1e6a68d89244cec822f",
+        "references/validation.md": "a63407da0542f5c18390913bc59562d0e3f7b546b5e101656790b939ab877002"
+      }
+    },
+    {
+      "name": "ae-depth",
+      "description": "Companion skill for depth and parallax in After Effects, covering native 3D versus layered 2D, depth planes, shadows, perspective, a zero-safe parallax control and glass surfaces. Load through ae_get_skill only when ae-clean-rig routes here; it is not a starting point.",
+      "references": [],
+      "sha256": {
+        "SKILL.md": "6f1e995136a1ca0701f9b6504a7d7fd8e1e70a0338bf54b39092ee5ad4aa45e5"
+      }
+    },
+    {
+      "name": "ae-mcp-realities",
+      "description": "Companion loaded through ae_get_skill when ae-clean-rig routes to it, not a starting point. Covers how this MCP reaches After Effects, what the policy switches hide, the error envelope and its codes, and how to recover safely after timeouts or partial batches.",
+      "references": [
+        "references/errors.md",
+        "references/tools.md"
+      ],
+      "sha256": {
+        "SKILL.md": "c50fdad66c757d0765984905e36721ad1afacfe84c4a173165a20245687e75d8",
+        "references/errors.md": "50e316dcb2efd512b2d41b6bee4dbd7d907656dd58c7ab9012fa28d72b78a755",
+        "references/tools.md": "136e5198aed1f4851e5df0b5b10e9be41748c3d7467fc1519e0b5911fb44e7e4"
+      }
+    },
+    {
+      "name": "ae-transitions",
+      "description": "Reusable transition comps with replaceable A and B sources, progress and style controls on a null, and seam testing. Companion loaded through ae_get_skill when ae-clean-rig routes to it, not a starting point.",
+      "references": [],
+      "sha256": {
+        "SKILL.md": "b55eb67f8129dce9ffd35f96f53f1d7fbb8b9146b4f979b6507e047a3e5f5fca"
+      }
+    },
+    {
+      "name": "ae-ui",
+      "description": "Companion skill for interface layouts in After Effects, covering the static design pass, scene spec, design tokens, hierarchy, component anatomy and text fitting. Load through ae_get_skill only when ae-clean-rig routes here; it is not a starting point.",
+      "references": [],
+      "sha256": {
+        "SKILL.md": "6d51d19b567840f39fdc65fab327a5264aeced59e2637a2a96cf2108bae99b3d"
+      }
+    }
+  ]
+}
