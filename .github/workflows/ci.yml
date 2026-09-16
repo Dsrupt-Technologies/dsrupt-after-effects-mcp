@@ -48,6 +48,9 @@ jobs:
         # offline suites (schema validation, fixtures, jsx ES3 lint) run fully.
         run: npm test
 
+      - name: Skills manifest and content
+        run: npm run skills:check
+
       - name: Tool docs drift
         run: node scripts/generate-tools-doc.mjs --check
 

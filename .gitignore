@@ -20,3 +20,6 @@ coverage/
 # Ephemeral file-IPC state exchanged with After Effects (request/response
 # JSON, dispatcher log, test-time project backups) — never committed.
 runtime/
+
+# Local reference clones used while comparing implementations; never part of this repo.
+reference/

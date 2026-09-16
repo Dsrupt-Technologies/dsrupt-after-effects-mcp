@@ -1,6 +1,6 @@
-# Contributing to mcp-aftereffects
+# Contributing to dsrupt-after-effects-mcp
 
-Thanks for your interest. This project connects Adobe After Effects to MCP clients (Claude Desktop / Claude Code and any other stdio-capable MCP client) through a TypeScript server that drives AE via file IPC plus a per-platform dispatcher launch (`AfterFX.exe -r` on Windows, `osascript`/DoScript on macOS). Most contributions will touch either the TS tool/operation definitions, the ExtendScript in `jsx/`, or both.
+Thanks for your interest. This project (Dsrupt's fork of the MIT upstream, see UPSTREAM.md) connects Adobe After Effects to MCP clients (Claude Desktop / Claude Code and any other stdio-capable MCP client) through a TypeScript server that drives AE via file IPC plus a per-platform dispatcher launch (`AfterFX.exe -r` on Windows, `osascript`/DoScript on macOS). Most contributions will touch either the TS tool/operation definitions, the ExtendScript in `jsx/`, or both.
 
 ## Prerequisites
 
@@ -9,8 +9,8 @@ Thanks for your interest. This project connects Adobe After Effects to MCP clien
 - **Git** with `core.autocrlf` unset or set to `input` (repo enforces LF via `.gitattributes`)
 
 ```bash
-git clone https://github.com/kumoproductions/mcp-aftereffects.git
-cd mcp-aftereffects
+git clone https://github.com/Dsrupt-Technologies/dsrupt-after-effects-mcp.git
+cd dsrupt-after-effects-mcp
 npm install        # also runs `lefthook install`
 npm run build
 ```
@@ -24,9 +24,9 @@ While iterating, point your MCP client at the freshly-built `dist/index.js` inst
 ```json
 {
   "mcpServers": {
-    "aftereffects": {
+    "dsrupt-after-effects": {
       "command": "node",
-      "args": ["/absolute/path/to/mcp-aftereffects/dist/index.js"]
+      "args": ["/absolute/path/to/dsrupt-after-effects-mcp/dist/index.js"]
     }
   }
 }
@@ -36,22 +36,24 @@ There is nothing to install inside After Effects — the dispatcher JSX is hande
 
 ## Development loop
 
-| Task                        | Command                  |
-| --------------------------- | ------------------------ |
-| Build the TS server         | `npm run build`          |
-| Build in watch mode         | `npm run dev`            |
-| Type-check without emitting | `npm run typecheck`      |
-| Type-check the tests        | `npm run typecheck:test` |
-| Lint TS/JS                  | `npm run lint`           |
-| Auto-fix TS/JS lint         | `npm run lint:fix`       |
-| Format TS/JS/JSON/MD/YAML   | `npm run format`         |
-| ES3 lint the ExtendScript   | `npm run lint:jsx`       |
-| Regenerate `docs/TOOLS.md`  | `npm run docs:tools`     |
-| **Run every static check**  | `npm run check`          |
-| Run the test suite          | `npm test`               |
-| Tests in watch mode         | `npm run test:watch`     |
+| Task                          | Command                   |
+| ----------------------------- | ------------------------- |
+| Build the TS server           | `npm run build`           |
+| Build in watch mode           | `npm run dev`             |
+| Type-check without emitting   | `npm run typecheck`       |
+| Type-check the tests          | `npm run typecheck:test`  |
+| Lint TS/JS                    | `npm run lint`            |
+| Auto-fix TS/JS lint           | `npm run lint:fix`        |
+| Format TS/JS/JSON/MD/YAML     | `npm run format`          |
+| ES3 lint the ExtendScript     | `npm run lint:jsx`        |
+| Regenerate `docs/TOOLS.md`    | `npm run docs:tools`      |
+| Regenerate the skill manifest | `npm run skills:manifest` |
+| Check skill content           | `npm run skills:check`    |
+| **Run every static check**    | `npm run check`           |
+| Run the test suite            | `npm test`                |
+| Tests in watch mode           | `npm run test:watch`      |
 
-`npm run check` (typecheck + test typecheck + oxlint + oxfmt check + JSX ES3 lint + tool-docs drift) is what CI runs on every PR. Run it locally before pushing.
+`npm run check` (skills check + typecheck + test typecheck + oxlint + oxfmt check + JSX ES3 lint + tool-docs drift) is what CI runs on every PR. Run it locally before pushing.
 
 Pre-commit hooks (via [lefthook](https://lefthook.dev/)) automatically run `oxlint`, the JSX ES3 lint, `oxfmt`, a CRLF guard, and regenerate `docs/TOOLS.md` when the tool registry changed. They install themselves during `npm install`.
 
@@ -292,12 +294,13 @@ Every file under `fixtures/` is validated against the schema as part of the offl
 
 ## Environment variables
 
-| Variable                 | Effect                                                                                                             |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| `AE_MCP_EXE`             | Path to AE — `AfterFX.exe` on Windows, the `.app` bundle on macOS (overrides the default probe). Legacy: `AE_EXE`. |
-| `AE_MCP_ENABLE_EVAL`     | Set to `1` to add `eval.run` (arbitrary ExtendScript) to the operation registry. Off by default.                   |
-| `AE_MCP_E2E`             | Set to `1` to enable session-mutating E2E tests.                                                                   |
-| `AE_MCP_E2E_DESTRUCTIVE` | Set to `1` to enable the destructive kill-test (run standalone).                                                   |
+| Variable                 | Effect                                                                                                                      |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| `DSRUPT_AE_EXE`          | Path to AE — `AfterFX.exe` on Windows, the `.app` bundle on macOS (overrides discovery). Also read: `AE_MCP_EXE`, `AE_EXE`. |
+| `DSRUPT_AE_SEARCH_DIRS`  | Extra folders to probe for an After Effects install (`;`-separated on Windows, `:` on macOS).                               |
+| `AE_MCP_ENABLE_EVAL`     | Set to `1` to add `eval.run` (arbitrary ExtendScript) to the operation registry. Off by default.                            |
+| `AE_MCP_E2E`             | Set to `1` to enable session-mutating E2E tests.                                                                            |
+| `AE_MCP_E2E_DESTRUCTIVE` | Set to `1` to enable the destructive kill-test (run standalone).                                                            |
 
 ## Commit / PR flow
 
@@ -306,16 +309,9 @@ Every file under `fixtures/` is validated against the schema as part of the offl
 - Keep the PR description tight: what changed, why, how it was tested.
 - CI must be green before review. If you can't run E2E locally (no After Effects), say so in the PR — reviewers will help verify on a real instance.
 
-## Release flow (maintainers)
+## Releases
 
-1. Land the release notes under a `## [Unreleased]` heading in `CHANGELOG.md` (Keep a Changelog subsections: Added / Changed / Fixed / Security).
-2. `npm version <patch|minor|major>` — two scripts run around the bump and stage their output into the version commit:
-   - `scripts/release-changelog.mjs` rewrites `## [Unreleased]` to `## [<version>] - <today>` and adds the `[<version>]: …/releases/tag/v<version>` link. It runs first as `preversion --check`, so a missing or empty `[Unreleased]` section aborts the release before anything is bumped.
-   - `scripts/sync-server-version.mjs` syncs `server.json` to the new version.
-3. Push the commit and the `v*` tag.
-4. The `release.yml` workflow re-runs the full check + test gate, then publishes to npm (Trusted Publishing via OIDC), the MCP Registry (`mcp-publisher`), and mirrors to GitHub Packages, plus creates the GitHub Release. Every publish step is idempotent — re-running a partially failed release is safe.
-
-The workflow refuses to publish if the tag, `package.json`, and `server.json` versions disagree, so never edit versions by hand.
+This package is private to Dsrupt and is not published to npm or the MCP Registry. Tag releases in Git; `npm run test:package` proves the tarball installs and serves the skills on its own.
 
 ## Reporting issues / feature requests
 

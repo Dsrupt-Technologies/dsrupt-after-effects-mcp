@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## dsrupt-after-effects-mcp 0.1.0 - 2026-09-16
+
+Forked from mcp-aftereffects 0.2.0 (below). See UPSTREAM.md for provenance.
+
+### Added
+
+- `ae_get_skill`: MCP-served skills with progressive disclosure (index, skill, reference) backed by `skills/manifest.json` with per-document hashes.
+- Skill corpus: `ae-clean-rig` (entry, nine references), `ae-animation`, `ae-ui`, `ae-depth`, `ae-transitions`, `ae-mcp-realities`.
+- After Effects discovery: override env, running process, Program Files, registry, Start Menu, `/Applications`, `~/Applications`, Spotlight, `DSRUPT_AE_SEARCH_DIRS`.
+- `dsrupt-after-effects` CLI: `doctor`, `locate-ae`, `check-ae` (live, non-mutating), `config`, `install-codex`, `install-claude-code`.
+- Node toolchain checks that distinguish a blocked `npm.ps1` from a missing npm.
+- `scripts/live-smoke.mjs`, `scripts/verify-package.mjs`, `scripts/check-skills.mjs`.
+
+### Changed
+
+- Package renamed to `dsrupt-after-effects-mcp`; server name `dsrupt-after-effects`; upstream publishing workflow, registry entry and artwork removed.
+
+### Fixed
+
+- Offline transport tests run on macOS without After Effects.
+
 ## [0.2.0] - 2026-08-12
 
 ### Added

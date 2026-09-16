@@ -20,10 +20,23 @@ const { version } = require("../package.json") as { version: string };
 
 const transport = new FileIpcTransport();
 
-const server = new McpServer({
-  name: "mcp-aftereffects",
-  version,
-});
+const server = new McpServer(
+  {
+    name: "dsrupt-after-effects",
+    title: "Dsrupt After Effects",
+    version,
+  },
+  {
+    instructions:
+      "Dsrupt After Effects: local control of Adobe After Effects with bundled skills. " +
+      "Before building or editing, read ae_get_skill({ name: 'ae-clean-rig' }) and load only the references it routes you to. " +
+      "Inspect the project first (ae_project_info, ae_comp_info, ae_layer_info), discover exact operations with ae_catalog, " +
+      "execute with ae_do, verify with ae_render_frame by looking at the image, and save with ae_save_project only to the intended path. " +
+      "Skills and the catalog work with After Effects closed; ae_project_info is the connection test. " +
+      "A batch.run is one undo group but not a transaction, and a TIMEOUT may mean the change already applied: inspect before retrying a mutation. " +
+      "Preserve unsaved user work; never reset or close a project unasked.",
+  },
+);
 
 /**
  * MCP behaviour hints, derived from each tool's declared `effect` rather than
@@ -78,16 +91,16 @@ for (const tool of ALL_TOOLS) {
 }
 
 async function main(): Promise<void> {
-  console.error(`[mcp-aftereffects] policy: ${policySummary()}`);
-  console.error(`[mcp-aftereffects] mailbox: ${RUNTIME_DIR}`);
+  console.error(`[dsrupt-after-effects] policy: ${policySummary()}`);
+  console.error(`[dsrupt-after-effects] mailbox: ${RUNTIME_DIR}`);
   if (readOnlyMode()) {
     console.error(
-      `[mcp-aftereffects] read-only mode — ${skipped.length > 0 ? `tools withheld: ${skipped.join(", ")}; ` : ""}` +
+      `[dsrupt-after-effects] read-only mode — ${skipped.length > 0 ? `tools withheld: ${skipped.join(", ")}; ` : ""}` +
         "ae_do accepts only operations that cannot modify the project.",
     );
   } else {
     console.error(
-      "[mcp-aftereffects] WRITE ACCESS IS ON — tools can create, mutate and delete project content. " +
+      "[dsrupt-after-effects] WRITE ACCESS IS ON — tools can create, mutate and delete project content. " +
         "Set AE_MCP_READONLY=1 for inspection-only sessions.",
     );
   }
@@ -96,6 +109,8 @@ async function main(): Promise<void> {
 }
 
 main().catch((err) => {
-  process.stderr.write(`mcp-aftereffects fatal: ${err && err.stack ? err.stack : String(err)}\n`);
+  process.stderr.write(
+    `dsrupt-after-effects fatal: ${err && err.stack ? err.stack : String(err)}\n`,
+  );
   process.exit(1);
 });

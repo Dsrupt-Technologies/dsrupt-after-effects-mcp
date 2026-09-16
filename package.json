@@ -1,47 +1,54 @@
 {
-  "name": "@kumoproductions/mcp-aftereffects",
-  "version": "0.2.0",
-  "description": "TypeScript MCP server for Adobe After Effects (Windows & macOS) — project/comp/layer introspection, atomic undo-grouped operations, JSON project export/import, and single-frame rendering via file IPC.",
+  "name": "dsrupt-after-effects-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Dsrupt After Effects MCP: a local stdio MCP server that connects an AI agent to Adobe After Effects (Windows and macOS) with structured inspection, catalogued operations, frame rendering, and MCP-served skills.",
   "keywords": [
     "adobe",
     "after-effects",
     "aftereffects",
-    "claude",
+    "dsrupt",
     "extendscript",
-    "llm",
     "mcp",
     "model-context-protocol",
-    "motion-graphics"
+    "motion-graphics",
+    "skills"
   ],
-  "homepage": "https://github.com/kumoproductions/mcp-aftereffects#readme",
+  "homepage": "https://github.com/Dsrupt-Technologies/dsrupt-after-effects-mcp#readme",
   "bugs": {
-    "url": "https://github.com/kumoproductions/mcp-aftereffects/issues"
+    "url": "https://github.com/Dsrupt-Technologies/dsrupt-after-effects-mcp/issues"
   },
   "license": "MIT",
   "author": {
-    "name": "kumo.productions, Inc.",
-    "url": "https://github.com/kumoproductions"
+    "name": "Dsrupt Technologies",
+    "url": "https://dsrupt.ai"
   },
+  "contributors": [
+    {
+      "name": "kumo.productions, Inc. (upstream mcp-aftereffects)",
+      "url": "https://github.com/kumoproductions/mcp-aftereffects"
+    }
+  ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kumoproductions/mcp-aftereffects.git"
+    "url": "git+https://github.com/Dsrupt-Technologies/dsrupt-after-effects-mcp.git"
   },
   "bin": {
-    "mcp-aftereffects": "dist/index.js"
+    "dsrupt-after-effects": "dist/cli/index.js",
+    "dsrupt-after-effects-mcp": "dist/index.js"
   },
   "files": [
     "dist",
     "jsx",
+    "skills",
     "fixtures",
     "LICENSE",
-    "README.md"
+    "UPSTREAM.md",
+    "README.md",
+    "docs"
   ],
   "type": "module",
   "main": "dist/index.js",
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/"
-  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
@@ -56,14 +63,18 @@
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "lint:jsx": "vitest run tests/lint-jsx.test.ts",
-    "check:server-json": "node scripts/check-server-json.mjs",
     "docs:tools": "npm run build && node scripts/generate-tools-doc.mjs",
     "docs:tools:check": "npm run build && node scripts/generate-tools-doc.mjs --check",
-    "check": "npm run typecheck && npm run typecheck:test && npm run lint && npm run format:check && npm run lint:jsx && npm run check:server-json && npm run docs:tools:check",
+    "check": "npm run skills:check && npm run typecheck && npm run typecheck:test && npm run lint && npm run format:check && npm run lint:jsx && npm run docs:tools:check",
     "prepare": "lefthook install",
-    "prepublishOnly": "npm run build",
-    "preversion": "node scripts/release-changelog.mjs --check",
-    "version": "node scripts/release-changelog.mjs && node scripts/sync-server-version.mjs && git add CHANGELOG.md server.json"
+    "test:offline": "vitest run --exclude \"tests/e2e/**\"",
+    "skills:manifest": "node scripts/generate-skills-manifest.mjs",
+    "skills:check": "node scripts/generate-skills-manifest.mjs --check && node scripts/check-skills.mjs",
+    "doctor": "node dist/cli/index.js doctor",
+    "check-ae": "node dist/cli/index.js check-ae",
+    "smoke": "node scripts/live-smoke.mjs",
+    "test:package": "npm run build && node scripts/verify-package.mjs",
+    "prepack": "npm run build"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
@@ -80,6 +91,5 @@
   },
   "engines": {
     "node": ">=24.0.0"
-  },
-  "mcpName": "io.github.kumoproductions/mcp-aftereffects"
+  }
 }
