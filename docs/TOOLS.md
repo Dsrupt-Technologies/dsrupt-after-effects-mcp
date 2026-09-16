@@ -4,7 +4,7 @@ Generated from `src/tools/**` via `npm run docs:tools` — do not edit by hand. 
 
 `ae_do`'s operation registry (`layer.*`, `keyframe.*`, …) is discoverable at runtime via `ae_catalog` and is **not** listed in this file.
 
-11 tools across 4 groups.
+12 tools across 4 groups.
 
 ## Inspect
 
@@ -12,6 +12,7 @@ Read-only project/comp/layer introspection.
 
 | Tool              | Description                                                                                                                                                  |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ae_get_skill`    | Read the bundled After Effects skills, one document at a time, without touching After Effects or the network.                                                |
 | `ae_project_info` | Project-level info: file path, dirty flag, all items with type/summary, active item.                                                                         |
 | `ae_comp_info`    | Detailed comp info: size, fps, duration, work area, motion blur, layer summaries.                                                                            |
 | `ae_layer_info`   | Full layer info: transform, effects, masks, text, shape contents, keyframes.                                                                                 |

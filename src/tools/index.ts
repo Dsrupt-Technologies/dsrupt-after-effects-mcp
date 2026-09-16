@@ -8,6 +8,7 @@ import { catalogTool } from "./catalog.js";
 import { compInfoTool } from "./comp-info.js";
 import { contextTool } from "./context.js";
 import { doTool } from "./do.js";
+import { getSkillTool } from "./get-skill.js";
 import { layerInfoTool } from "./layer-info.js";
 import { projectExportTool } from "./project-export.js";
 import { projectImportTool } from "./project-import.js";
@@ -29,6 +30,7 @@ export type AnyTool = {
 
 /** Every MCP tool this server exposes, in registration order. */
 export const ALL_TOOLS: AnyTool[] = [
+  getSkillTool,
   projectInfoTool,
   compInfoTool,
   layerInfoTool,
